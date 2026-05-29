@@ -1,2 +1,1 @@
-release: bash railway.sh
-web: vendor/bin/heroku-php-apache2 public/
+web: php -S 0.0.0.0:${PORT:-8080} -t public
