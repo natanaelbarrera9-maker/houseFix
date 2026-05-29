@@ -90,21 +90,23 @@ class AttendanceController extends Controller
             fputs($file, "\xEF\xBB\xBF"); 
             fputcsv($file, $columns);
 
-            $employees = User::where('role_id', 2)->get();
-            
-            // Calcular inicio (Lunes) y fin (Domingo) de la semana actual
             $startOfWeek = Carbon::now()->startOfWeek(); 
+            $endOfWeek = Carbon::now()->endOfWeek();
+
+            // Eager load attendances for the specific week
+            $employees = User::where('role_id', 2)
+                ->with(['attendances' => function($query) use ($startOfWeek, $endOfWeek) {
+                    $query->whereBetween('check_in', [$startOfWeek, $endOfWeek]);
+                }])->get();
 
             foreach ($employees as $emp) {
                 $row = [$emp->name];
 
-                // Recorrer los 7 días de la semana
                 for ($i = 0; $i < 7; $i++) {
                     $currentDay = $startOfWeek->copy()->addDays($i);
                     
-                    $record = Attendance::where('user_id', $emp->id)
-                                ->whereDate('check_in', $currentDay)
-                                ->first();
+                    $record = $emp->attendances->first(fn($a) => 
+                        Carbon::parse($a->check_in)->isSameDay($currentDay));
 
                     if ($record) {
                         if ($record->status == 'falta') {

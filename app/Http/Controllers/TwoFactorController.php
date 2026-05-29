@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TwoFactorCode as TwoFactorMail;
 
 class TwoFactorController extends Controller
 {
@@ -51,7 +53,7 @@ class TwoFactorController extends Controller
         $user = auth()->user();
         $user->generateTwoFactorCode();
         
-        \Mail::to($user->email)->send(new \App\Mail\TwoFactorCode($user->two_factor_code));
+        Mail::to($user->email)->send(new TwoFactorMail($user->two_factor_code));
 
         return back()->with('success', 'El código ha sido reenviado a tu correo: ' . $user->email);
     }
