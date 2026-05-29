@@ -3,6 +3,7 @@
     "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "php -S 0.0.0.0:${PORT:-8080} -t public"
+    "startCommand": "bash init.sh && php -S 0.0.0.0:${PORT:-8080} -t public"
   }
 }
+
