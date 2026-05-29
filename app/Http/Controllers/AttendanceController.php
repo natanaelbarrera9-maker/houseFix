@@ -23,13 +23,12 @@ class AttendanceController extends Controller
         }
 
         // 2. Si es GERENTE, preparamos la lista.
-        $employees = User::where('role_id', 2)->get();
-
-        foreach ($employees as $employee) {
-            $employee->today_record = Attendance::where('user_id', $employee->id)
-                ->whereDate('check_in', Carbon::today())
-                ->first();
-        }
+        $employees = User::where('role_id', 2)
+            ->with(['attendances' => function($query) {
+                $query->whereDate('check_in', Carbon::today());
+            }])
+            ->get()
+            ->each(fn($emp) => $emp->today_record = $emp->attendances->first());
 
         return view('attendance.index', compact('employees'));
     }

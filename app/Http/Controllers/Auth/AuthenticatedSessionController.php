@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail; // Necesario para enviar correo
 use App\Mail\TwoFactorCode;          // Necesario para el formato del correo
+use Illuminate\Support\Facades\Log;  // Para registrar errores
 
 class AuthenticatedSessionController extends Controller
 {
@@ -46,9 +47,7 @@ class AuthenticatedSessionController extends Controller
             try {
                 Mail::to($user->email)->send(new TwoFactorCode($user->two_factor_code));
             } catch (\Exception $e) {
-                // Si el correo falla, podríamos mostrar un error, 
-                // pero por ahora dejamos que continúe para que al menos vea la pantalla de código.
-                // \Log::error("Error enviando correo 2FA: " . $e->getMessage());
+                Log::error("Error enviando correo 2FA a {$user->email}: " . $e->getMessage());
             }
 
             // c) LO MÁS IMPORTANTE: No lo mandamos al Dashboard, lo mandamos a VERIFICAR
